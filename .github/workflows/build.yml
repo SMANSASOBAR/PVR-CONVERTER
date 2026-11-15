@@ -23,9 +23,17 @@ jobs:
       - name: Check assets
         run: test -f assets/icon.png && test -f assets/Poins.ttf
       - name: Build APK
-        run: buildozer -v android debug
+        run: |
+          set -o pipefail
+          buildozer -v android debug 2>&1 | tee build.log
+      - name: Tampilkan error (ringkas)
+        if: failure()
+        run: |
+          echo "=== BARIS ERROR ==="
+          grep -n -i -E "error|exception|failed|not found|no such" build.log | tail -n 40
+          echo "=== 60 BARIS TERAKHIR ==="
+          tail -n 60 build.log
       - uses: actions/upload-artifact@v4
         with:
           name: CONVERTER-apk
           path: bin/*.apk
-          
